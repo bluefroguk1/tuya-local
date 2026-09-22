@@ -37,6 +37,15 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     )
 
 
+def _ha_brightness_to_dp_value(ha_brightness, dp_range):
+    """Convert HA brightness to a clamped device DP value."""
+    if ha_brightness == 1 and dp_range[0] != 0:
+        return dp_range[0]
+
+    dp_value = color_util.brightness_to_value(dp_range, ha_brightness)
+    return max(dp_range[0], dp_value)
+
+
 class TuyaLocalLight(TuyaLocalEntity, LightEntity):
     """Representation of a Tuya WiFi-connected light."""
 
@@ -60,12 +69,21 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
 
         # Set min and max color temp
         if self._color_temp_dps:
+            range_set = False
             m = self._color_temp_dps._find_map_for_dps(0, self._device)
             if m:
                 tr = m.get("target_range")
                 if tr:
-                    self._attr_min_color_temp_kelvin = tr.get("min")
-                    self._attr_max_color_temp_kelvin = tr.get("max")
+                    # Target range can be inverted, so use min/max functions to ensure correct order
+                    self._attr_min_color_temp_kelvin = min(tr.get("min"), tr.get("max"))
+                    self._attr_max_color_temp_kelvin = max(tr.get("min"), tr.get("max"))
+                    range_set = True
+            if not range_set:
+                r = self._color_temp_dps.range(self._device)
+                if r:
+                    # For lights that use K natively, use range
+                    self._attr_min_color_temp_kelvin = r[0]
+                    self._attr_max_color_temp_kelvin = r[1]
 
     @property
     def supported_color_modes(self):
@@ -169,9 +187,21 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
         return self._white_brightness
 
     @property
-    def _white_brightness(self):
+    def _effective_brightness_range(self):
+        """Get the effective brightness range of the light"""
         if self._brightness_dps:
             r = self._brightness_dps.range(self._device)
+            if r:
+                if self._switch_dps is None and r[0] == 0:
+                    # If the light has no switch, and the brightness range starts
+                    # at 0, the effective minimum brightness is 1
+                    return (self._brightness_dps.step(self._device, False), r[1])
+                return r
+
+    @property
+    def _white_brightness(self):
+        if self._brightness_dps:
+            r = self._effective_brightness_range
             val = self._brightness_dps.get_value(self._device)
             if r and val:
                 val = color_util.value_to_brightness(r, val)
@@ -285,13 +315,9 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
                 color_mode = ColorMode.WHITE
             if ATTR_BRIGHTNESS not in params and self._brightness_dps:
                 bright = params.get(ATTR_WHITE)
-                r = self._brightness_dps.range(self._device)
+                r = self._effective_brightness_range
                 if r:
-                    # ensure full range is used
-                    if bright == 1 and r[0] != 0:
-                        bright = r[0]
-                    else:
-                        bright = color_util.brightness_to_value(r, bright)
+                    bright = _ha_brightness_to_dp_value(bright, r)
 
                 _LOGGER.info(
                     "%s setting white brightness to %d", self._config.config_id, bright
@@ -462,14 +488,9 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
         ):
             bright = params.get(ATTR_BRIGHTNESS)
 
-            r = self._brightness_dps.range(self._device)
+            r = self._effective_brightness_range
             if r:
-                # ensure full range is used
-                if bright == 1 and r[0] != 0:
-                    bright = r[0]
-                else:
-                    bright = color_util.brightness_to_value(r, bright)
-
+                bright = _ha_brightness_to_dp_value(bright, r)
             _LOGGER.info("%s setting brightness to %d", self._config.config_id, bright)
             settings = {
                 **settings,
@@ -493,11 +514,19 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
                     ),
                 }
 
+        # On packed dps where switch / brightness / effect all share the same
+        # dp id (e.g. dp 51 with different masks), the original `id not in
+        # settings` check incorrectly skipped the switch-on merge once any
+        # other masked sub-field had populated settings. For masked dps it's
+        # always safe to merge — get_values_to_set with pending_map=settings
+        # will OR onto the existing pending value.
         if (
             self._switch_dps
             and not self._switch_dps.readonly
             and not self.is_on
-            and self._switch_dps.id not in settings
+            and (
+                self._switch_dps.mask is not None or self._switch_dps.id not in settings
+            )
         ):
             _LOGGER.info("%s turning light on", self._config.config_id)
             settings = settings | self._switch_dps.get_values_to_set(
@@ -506,10 +535,13 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
         elif (
             self._brightness_dps
             and not self.is_on
-            and self._brightness_dps.id not in settings
+            and (
+                self._brightness_dps.mask is not None
+                or self._brightness_dps.id not in settings
+            )
         ):
             bright = 255
-            r = self._brightness_dps.range(self._device)
+            r = self._effective_brightness_range
             if r:
                 bright = color_util.brightness_to_value(r, bright)
             _LOGGER.info(
@@ -524,7 +556,9 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
             self._effect_dps
             and not self.is_on
             and "off" in self._effect_dps.values(self._device)
-            and self._effect_dps.id not in settings
+            and (
+                self._effect_dps.mask is not None or self._effect_dps.id not in settings
+            )
         ):
             # Special case for lights with effect that has off state, but no switch or brightness
             on_value = self._effect_dps.default

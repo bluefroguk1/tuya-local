@@ -106,6 +106,26 @@
             "not_supported": "申し訳ございませんが、このデバイスはサポートされていません。"
         }
     },
+    "services": {
+        "send_learned_ir_command": {
+            "name": "学習した赤外線コマンドを送信",
+            "description": "以前にリモートエンティティによって学習されたリモートコマンドを、任意の赤外線エミッタに送信します。",
+            "fields": {
+                "emitter_entity_id": {
+                    "name": "赤外線エミッタ",
+                    "description": "コマンドを送信する赤外線エンティティのエンティティID。"
+                },
+                "command": {
+                    "name": "コマンド",
+                    "description": "送信するコマンド。これは、このリモートの統合によって以前に学習されたコマンドでなければなりません。"
+                },
+                "device": {
+                    "name": "デバイス",
+                    "description": "コマンドを送信するIRデバイス。これはオプションで、コマンドがデバイスとともに保存された場合にのみ必要です。"
+                }
+            }
+        }
+    },
     "entity": {
         "binary_sensor": {
             "direction": {
@@ -201,6 +221,21 @@
             },
             "filter_reset": {
                 "name": "フィルターのリセット"
+            },
+            "alarm_off": {
+                "name": "アラームオフ"
+            },
+            "alarm_snooze": {
+                "name": "アラームスヌーズ"
+            },
+            "alarm_x_reset": {
+                "name": "アラーム {x} リセット"
+            },
+            "radio_seek": {
+                "name": "ラジオシーク"
+            },
+            "radio_stop": {
+                "name": "ラジオ停止"
             }
         },
         "climate": {
@@ -275,7 +310,9 @@
                             "fan_only": "ファン",
                             "heat": "温風",
                             "floor_cool": "冷却床",
-                            "floor_heat": "床暖房"
+                            "floor_heat": "床暖房",
+                            "air_floor_cool": "空気と床冷却",
+                            "air_floor_heat": "空気と床暖房"
                         }
                     }
                 }
@@ -322,7 +359,9 @@
                             "program_2": "プログラム 2",
                             "program_3": "プログラム 3",
                             "standby": "スタンバイ",
-                            "fan_only": "ファンのみ"
+                            "fan_only": "ファンのみ",
+                            "program": "プログラム",
+                            "anti_frost": "霜防止"
                         }
                     }
                 }
@@ -374,6 +413,9 @@
         "event": {
             "alarm": {
                 "name": "アラーム"
+            },
+            "notification": {
+                "name": "通知"
             }
         },
         "humidifier": {
@@ -390,6 +432,23 @@
             }
         },
         "fan": {
+            "air_purifier": {
+                "name": "空気清浄機",
+                "state_attributes": {
+                    "preset_mode": {
+                        "state": {
+                            "auto": "自動",
+                            "manual": "マニュアル",
+                            "sleep": "睡眠",
+                            "low": "低い",
+                            "medium": "中",
+                            "high": "高い",
+                            "strong": "強い",
+                            "displayoff": "ディスプレイオフ"
+                        }
+                    }
+                }
+            },
             "aroma_diffuser": {
                 "name": "アロマディフューザー",
                 "state_attributes": {
@@ -452,7 +511,7 @@
                             "auto": "自動",
                             "manual": "マニュアル",
                             "eco": "エコ",
-                            "anti-condensation": "結露防止",
+                            "anti_condensation": "結露防止",
                             "extractor": "抽出",
                             "heat_recovery": "熱回収",
                             "timer": "タイマー",
@@ -493,6 +552,12 @@
             },
             "rangehood_light": {
                 "name": "レンジフードライト"
+            },
+            "color_light": {
+                "name": "カラーライト"
+            },
+            "ambient_light": {
+                "name": "アンビエントライト"
             }
         },
         "lock": {
@@ -501,6 +566,9 @@
             }
         },
         "number": {
+            "flame_level": {
+                "name": "炎レベル"
+            },
             "manual_feed": {
                 "name": "手動給餌量"
             },
@@ -533,6 +601,18 @@
             },
             "leakage_current": {
                 "name": "漏れ電流"
+            },
+            "alarm_x_snooze_duration": {
+                "name": "アラーム {x} スヌーズ時間"
+            },
+            "alarm_x_wake_light_lead_time": {
+                "name": "アラーム {x} ウェイクライト先行時間"
+            },
+            "radio_frequency": {
+                "name": "ラジオ周波数"
+            },
+            "snooze_duration": {
+                "name": "スヌーズ時間"
             }
         },
         "select": {
@@ -610,6 +690,11 @@
                     "spanish": "Español",
                     "turkish": "Türkçe",
                     "polish": "Polski",
+                    "bulgarian": "Български",
+                    "czech": "Čeština",
+                    "romanian": "Română",
+                    "slovak": "Slovenčina",
+                    "thai": "ไทย",
                     "vietnamese": "Tiếng Việt"
                 }
             },
@@ -644,6 +729,14 @@
                     "high": "高い"
                 }
             },
+            "night_vision": {
+                "name": "ナイトビジョン",
+                "state": {
+                    "off": "オフ",
+                    "on": "オン",
+                    "auto": "自動"
+                }
+            },
             "recipe": {
                 "name": "レシピ",
                 "state": {
@@ -672,6 +765,13 @@
                     "preheat": "予熱"
                 }
             },
+            "recording_mode": {
+                "name": "録画モード",
+                "state": {
+                    "event": "イベント",
+                    "continuous": "連続"
+                }
+            },
             "scene": {
                 "name": "シーン",
                 "state": {
@@ -695,6 +795,7 @@
                 "state": {
                     "cancel": "キャンセル",
                     "continuous": "連続",
+                    "custom": "カスタム",
                     "5s": "5秒",
                     "10s": "10秒",
                     "15s": "15秒",
@@ -767,7 +868,13 @@
                     "4d": "4日",
                     "5d": "5日",
                     "6d": "6日",
-                    "7d": "7日"
+                    "7d": "7日",
+                    "10d": "10日",
+                    "30d": "30日",
+                    "60d": "60日",
+                    "90d": "90日",
+                    "160d": "160日",
+                    "365d": "365日"
                 }
             },
             "temperature_unit": {
@@ -795,7 +902,8 @@
                     "medium": "中",
                     "high": "高い",
                     "rapid_clean": "急速清掃",
-                    "schedule": "スケジュール"
+                    "schedule": "スケジュール",
+                    "sleep": "睡眠"
                 }
             },
             "activation_mode": {
@@ -928,7 +1036,7 @@
                     "7m": "7分",
                     "8m": "8分",
                     "9m": "9分",
-                    "10m": "10分"    
+                    "10m": "10分"
                 }
             },
             "menu": {
@@ -985,6 +1093,71 @@
                     "red_bean_bread": "あんパン",
                     "milk_toast": "ミルクトースト"
                 }
+            },
+            "display_brightness": {
+                "name": "ディスプレイの明るさ",
+                "state": {
+                    "off": "オフ",
+                    "day": "昼間",
+                    "night": "夜間",
+                    "dim": "暗い",
+                    "bright": "明るい",
+                    "auto": "自動"
+                }
+            },
+            "seconds_dot": {
+                "name": "秒ドット",
+                "state": {
+                    "static": "固定",
+                    "blinking": "点滅"
+                }
+            },
+            "alarm_x_snooze_action": {
+                "name": "アラーム {x} スヌーズモード",
+                "state": {
+                    "mute": "音をミュート",
+                    "mute_light": "音 + ライトをミュート",
+                    "light_only": "ライトのみミュート"
+                }
+            },
+            "alarm_x_sound_effect": {
+                "name": "アラーム {x} サウンドエフェクト",
+                "state": {
+                    "normal": "通常",
+                    "fade_in": "フェードイン",
+                    "fade_out": "フェードアウト"
+                }
+            },
+            "alarm_x_wake_light_mode": {
+                "name": "アラーム {x} ウェイクライトモード",
+                "state": {
+                    "no_light": "ライトなし",
+                    "rainbow": "レインボー",
+                    "candle_flicker": "キャンドルフリッカー",
+                    "romantic_breath": "ロマンチックブレス",
+                    "quiet_deep_sea": "静かな深海",
+                    "flowing_colors": "流れる色",
+                    "magic_jungle": "マジックジャングル",
+                    "perfect_party": "パーフェクトパーティー",
+                    "sunrise_at_sea": "海の日の出",
+                    "dynamic_music": "ダイナミックミュージック"
+                }
+            },
+            "snooze_action": {
+                "name": "スヌーズアクション",
+                "state": {
+                    "sound_radio": "サウンド + ラジオ",
+                    "light": "ライト",
+                    "radio": "ラジオ",
+                    "radio_sound_light": "ラジオ + サウンド + ライト"
+                }
+            },
+            "time_format": {
+                "name": "時刻形式",
+                "state": {
+                    "12_hour": "12時間",
+                    "24_hour": "24時間"
+                }
             }
         },
         "sensor": {
@@ -1008,6 +1181,17 @@
                     "poor": "悪い",
                     "severe": "非常に悪い",
                     "danger": "危険"
+                }
+            },
+            "sd_status": {
+                "name": "SDカードステータス",
+                "state": {
+                    "fault": "故障",
+                    "formatting": "フォーマット中",
+                    "full": "満杯",
+                    "missing": "欠落",
+                    "normal": "正常",
+                    "unformatted": "未フォーマット"
                 }
             },
             "status": {
@@ -1069,6 +1253,7 @@
                     "occupied": "占有",
                     "normal": "通常",
                     "low": "低い",
+                    "medium": "中",
                     "high": "高い",
                     "unwashed": "未洗浄",
                     "pre_washing": "予洗い",
@@ -1088,8 +1273,6 @@
                     "full": "満杯",
                     "empty": "空",
                     "missing": "欠落",
-                    "formatting": "フォーマット中",
-                    "unformatted": "未フォーマット",
                     "failed": "失敗",
                     "replying": "返信中",
                     "playback": "再生",
@@ -1165,9 +1348,36 @@
             },
             "leakage_current": {
                 "name": "漏れ電流"
+            },
+            "active_lights": {
+                "name": "アクティブライト",
+                "state": {
+                    "all_off": "すべてオフ",
+                    "night_on": "ナイトライトオン",
+                    "color_on": "カラーライトオン",
+                    "ambient_on": "アンビエントライトオン"
+                }
+            },
+            "wireless_charging": {
+                "name": "ワイヤレス充電ステータス",
+                "state": {
+                    "idle": "待機中",
+                    "charging": "充電中",
+                    "full": "満充電",
+                    "foreign_object_detected": "異物検出"
+                }
             }
         },
         "switch": {
+            "timer": {
+                "name": "タイマー"
+            },
+            "empty_tank": {
+                "name": "タンクを空にする"
+            },
+            "fill_tank": {
+                "name": "タンクを満たす"
+            },
             "anti_frost": {
                 "name": "霜防止"
             },
@@ -1183,6 +1393,9 @@
                     "off": "トリップ",
                     "on": "リセット"
                 }
+            },
+            "camera_record": {
+                "name": "カメラ録画"
             },
             "do_not_disturb": {
                 "name": "邪魔しないでください"
@@ -1228,6 +1441,54 @@
             },
             "rangehood": {
                 "name": "レンジフード"
+            },
+            "alarm_x": {
+                "name": "アラーム {x}"
+            },
+            "alarm_x_snooze_enabled": {
+                "name": "アラーム {x} スヌーズ有効"
+            },
+            "alarm_x_day_monday": {
+                "name": "アラーム {x} 1-月曜日"
+            },
+            "alarm_x_day_tuesday": {
+                "name": "アラーム {x} 2-火曜日"
+            },
+            "alarm_x_day_wednesday": {
+                "name": "アラーム {x} 3-水曜日"
+            },
+            "alarm_x_day_thursday": {
+                "name": "アラーム {x} 4-木曜日"
+            },
+            "alarm_x_day_friday": {
+                "name": "アラーム {x} 5-金曜日"
+            },
+            "alarm_x_day_saturday": {
+                "name": "アラーム {x} 6-土曜日"
+            },
+            "alarm_x_day_sunday": {
+                "name": "アラーム {x} 7-日曜日"
+            },
+            "music_playback": {
+                "name": "音楽再生"
+            },
+            "network_time": {
+                "name": "ネットワーク時刻同期"
+            },
+            "night_mode": {
+                "name": "ナイトモード"
+            },
+            "radio": {
+                "name": "ラジオ"
+            },
+            "snooze": {
+                "name": "スヌーズ"
+            },
+            "motion_detection": {
+                "name": "モーション検出"
+            },
+            "watermark": {
+                "name": "ウォーターマーク"
             }
         },
         "text": {
@@ -1239,6 +1500,15 @@
             },
             "schedule": {
                 "name": "スケジュール"
+            },
+            "alarm_settings": {
+                "name": "アラーム設定"
+            },
+            "sleep_settings": {
+                "name": "スリープ設定"
+            },
+            "station_list": {
+                "name": "ステーションリスト"
             }
         },
         "time": {
@@ -1253,6 +1523,12 @@
             },
             "timer_x": {
                 "name": "タイマー{x}"
+            },
+            "alarm_x_time": {
+                "name": "アラーム {x} 時刻"
+            },
+            "clock_time": {
+                "name": "時計の時刻"
             }
         },
         "valve": {
@@ -1269,6 +1545,26 @@
             },
             "hot_water": {
                 "name": "温水機"
+            }
+        },
+        "siren": {
+            "alarm_x": {
+                "name": "アラーム {x}",
+                "state_attributes": {
+                    "tone": {
+                        "state": {
+                            "none": "なし",
+                            "birds": "鳥",
+                            "sea": "海",
+                            "valley": "谷",
+                            "piano": "ピアノ",
+                            "soft": "ソフト",
+                            "phone": "電話",
+                            "beep": "ビープ",
+                            "radio": "ラジオ"
+                        }
+                    }
+                }
             }
         }
     }

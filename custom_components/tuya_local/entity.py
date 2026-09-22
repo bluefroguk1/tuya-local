@@ -6,8 +6,8 @@ import json
 import logging
 
 from homeassistant.const import (
-    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     UnitOfArea,
+    UnitOfDensity,
     UnitOfTemperature,
 )
 from homeassistant.helpers.entity import EntityCategory
@@ -55,7 +55,7 @@ class TuyaLocalEntity:
         own_name = self._config.name
         if not own_name and not self.use_device_name:
             # super has the translation logic
-            own_name = getattr(super(), "name")
+            own_name = super().name
         return own_name
 
     @property
@@ -143,8 +143,8 @@ class TuyaLocalEntity:
 UNIT_ASCII_MAP = {
     "C": UnitOfTemperature.CELSIUS.value,
     "F": UnitOfTemperature.FAHRENHEIT.value,
-    "ugm3": CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-    "m2": UnitOfArea.SQUARE_METERS,
+    "ugm3": UnitOfDensity.MICROGRAMS_PER_CUBIC_METER.value,
+    "m2": UnitOfArea.SQUARE_METERS.value,
 }
 
 
