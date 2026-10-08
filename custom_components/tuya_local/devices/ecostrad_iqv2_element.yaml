@@ -93,11 +93,12 @@ entities:
     translation_key: timer
     category: config
     dps:
-      - id: 108
+      - id: 104
         type: string
         name: option
+        optional: true
         mapping:
-          - dps_val: "0"
+          - dps_val: "off"
             value: cancel
             icon: "mdi:window-closed"
           - dps_val: "60"
@@ -111,10 +112,30 @@ entities:
     class: duration
     category: config
     dps:
-      - id: 111
+      - id: 103
         type: integer
         name: value
+        optional: true
         unit: h
         range:
           min: 0
-          max: 7
+          max: 8
+  - entity: sensor
+    name: Scheduled mode
+    class: enum
+    icon: "mdi:calendar-clock"
+    category: diagnostic
+    dps:
+      - id: 106
+        type: string
+        name: sensor
+        optional: true
+        mapping:
+          - dps_val: "off"
+            value: "Off"
+          - dps_val: eco
+            value: Eco
+          - dps_val: fro
+            value: Frost protection
+          - dps_val: cft
+            value: Comfort

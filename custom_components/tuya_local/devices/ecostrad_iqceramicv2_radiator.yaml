@@ -2,10 +2,10 @@ name: Radiator
 products:
   - id: g8szwifd3zgozoxt
     manufacturer: Ecostrad
-    name: iQ Ceramic
+    model: iQ Ceramic
   - id: oqqreuepbc0g8lcg
     manufacturer: Ecostrad
-    name: iQ Ceramic
+    model: iQ Ceramic V2
 entities:
   - entity: climate
     translation_key: heater
@@ -50,8 +50,14 @@ entities:
         mapping:
           - dps_val: heating
             value: heating
+          - dps_val: cooling
+            value: idle
           - dps_val: warm
             value: idle
+      - id: 107
+        name: limit_function
+        type: string
+        optional: true
   - entity: lock
     translation_key: child_lock
     category: config
@@ -83,33 +89,148 @@ entities:
         type: integer
         optional: true
         unit: min
+  - entity: switch
+    name: Boost
+    icon: "mdi:rocket-launch"
+    dps:
+      - id: 101
+        type: boolean
+        name: switch
+        optional: true
+  - entity: number
+    name: Boost temperature
+    class: temperature
+    category: config
+    dps:
+      - id: 103
+        type: integer
+        name: value
+        optional: true
+        unit: C
+        range:
+          min: 70
+          max: 300
+        mapping:
+          - scale: 10
+            step: 5
+  - entity: number
+    name: Boost time
+    class: duration
+    category: config
+    dps:
+      - id: 102
+        type: integer
+        name: value
+        optional: true
+        unit: h
+        range:
+          min: 10
+          max: 240
+        mapping:
+          - scale: 10
+            step: 5
+  - entity: number
+    name: Comfort temperature
+    class: temperature
+    category: config
+    dps:
+      - id: 111
+        type: integer
+        name: value
+        optional: true
+        unit: C
+        range:
+          min: 70
+          max: 300
+        mapping:
+          - scale: 10
+            step: 5
+  - entity: number
+    name: Eco temperature
+    class: temperature
+    category: config
+    dps:
+      - id: 112
+        type: integer
+        name: value
+        optional: true
+        unit: C
+        range:
+          min: 70
+          max: 300
+        mapping:
+          - scale: 10
+            step: 5
+  - entity: number
+    name: Frost protection temperature
+    class: temperature
+    category: config
+    dps:
+      - id: 113
+        type: integer
+        name: value
+        optional: true
+        unit: C
+        range:
+          min: 70
+          max: 160
+        mapping:
+          - scale: 10
+            step: 5
+  - entity: switch
+    translation_key: anti_frost
+    category: config
+    dps:
+      - id: 109
+        type: string
+        name: switch
+        optional: true
+        mapping:
+          - dps_val: "1"
+            value: true
+          - dps_val: "0"
+            value: false
   - entity: select
     name: Open window detection
     translation_key: timer
     category: config
     dps:
-      - id: 108
+      - id: 104
         type: string
         name: option
+        optional: true
         mapping:
           - dps_val: "0"
             value: cancel
             icon: "mdi:window-closed"
           - dps_val: "60"
-            value: "60m"
+            value: "1h"
             icon: "mdi:window-open"
           - dps_val: "90"
             value: "1h30m"
             icon: "mdi:window-open"
+  - entity: switch
+    translation_key: motion_detection
+    category: config
+    dps:
+      - id: 117
+        type: boolean
+        name: switch
+        optional: true
+      - id: 108
+        type: string
+        name: sensor_mode
+        optional: true
   - entity: select
     name: PIR timeout
     category: config
     translation_key: timer
     icon: "mdi:timer-settings-outline"
     dps:
-      - id: 104
+      - id: 105
         type: string
         name: option
+        optional: true
         mapping:
           - dps_val: "15"
             value: "15m"
@@ -119,6 +240,33 @@ entities:
             value: "45m"
           - dps_val: "60"
             value: "1h"
+  - entity: switch
+    name: Buzzer
+    icon: "mdi:volume-high"
+    category: config
+    dps:
+      - id: 110
+        type: string
+        name: switch
+        optional: true
+        mapping:
+          - dps_val: "1"
+            value: true
+          - dps_val: "0"
+            value: false
+  - entity: switch
+    translation_key: network_time
+    category: config
+    dps:
+      - id: 106
+        type: string
+        name: switch
+        optional: true
+        mapping:
+          - dps_val: "1"
+            value: true
+          - dps_val: "0"
+            value: false
   - entity: sensor
     class: power
     dps:
@@ -130,6 +278,11 @@ entities:
         class: measurement
         mapping:
           - scale: 10
+      # incremental energy since the last report, not a running total
+      - id: 121
+        name: add_ele
+        type: integer
+        optional: true
   - entity: sensor
     class: voltage
     category: diagnostic
